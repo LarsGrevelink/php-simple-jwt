@@ -1,5 +1,5 @@
 {
-    "name": "lgrevelink/simple-jwt",
+    "name": "lgrevelink/php-simple-jwt",
     "description": "Simple package for creating JSON Web Tokens and using them in a PHP application.",
     "license": "MIT",
     "authors": [
