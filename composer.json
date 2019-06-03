@@ -1,0 +1,30 @@
+{
+    "name": "lgrevelink/simple-jwt",
+    "description": "Simple package for creating JSON Web Tokens and using them in a PHP application.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lars Grevelink"
+        }
+    ],
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LGrevelink\\SimpleJWT\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always"
+    },
+    "minimum-stability": "stable"
+}
