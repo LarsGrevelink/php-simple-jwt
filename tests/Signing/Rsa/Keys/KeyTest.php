@@ -14,7 +14,7 @@ class KeyTest extends TestCase
      */
     protected $key;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->key = $this->getMockBuilder(Key::class)->setConstructorArgs(['path/to/key.pem'])->setMethods(['loadKey'])->getMockForAbstractClass();
 

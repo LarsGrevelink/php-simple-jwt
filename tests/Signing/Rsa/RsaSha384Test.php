@@ -7,7 +7,7 @@ use Tests\Signing\RsaTest;
 
 final class RsaSha384Test extends RsaTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

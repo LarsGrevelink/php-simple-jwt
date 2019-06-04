@@ -13,7 +13,7 @@ abstract class HmacTest extends TestCase
      */
     protected $hmac;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->hmac = $this->getMockForAbstractClass(Hmac::class);
 

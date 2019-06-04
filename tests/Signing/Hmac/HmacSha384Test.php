@@ -7,7 +7,7 @@ use Tests\Signing\HmacTest;
 
 final class HmacSha384Test extends HmacTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->hmac = new HmacSha384();
     }

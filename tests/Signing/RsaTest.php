@@ -27,7 +27,7 @@ class RsaTest extends TestCase
      */
     protected $publicKey;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->privateKey = new PrivateKeyMock('path/to/private/key.pem');
         $this->publicKey = new PublicKeyMock('path/to/public/key.pem');

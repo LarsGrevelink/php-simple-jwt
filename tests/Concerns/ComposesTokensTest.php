@@ -11,7 +11,7 @@ final class ComposesTokensTest extends TestCase
 {
     protected $trait;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->trait = $this->getMockForTrait(ComposesTokens::class);
     }
