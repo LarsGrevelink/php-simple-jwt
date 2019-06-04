@@ -113,6 +113,7 @@ abstract class TokenBlueprint
                     }
 
                     break;
+                case 'issuedAt':
                 case 'notBefore':
                     if ($now < $tokenValue) {
                         return false;
@@ -120,7 +121,6 @@ abstract class TokenBlueprint
 
                     break;
                 case 'expirationTime':
-                case 'issuedAt':
 
                     if ($now > $tokenValue) {
                         return false;

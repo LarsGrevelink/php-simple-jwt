@@ -106,7 +106,7 @@ final class TokenBlueprintTest extends TestCase
 
         $this->assertTrue(IssuedAtBlueprintMock::validate($token));
 
-        $token->setIssuedAt(-3600);
+        $token->setIssuedAt(3600);
 
         $this->assertFalse(IssuedAtBlueprintMock::validate($token));
     }
