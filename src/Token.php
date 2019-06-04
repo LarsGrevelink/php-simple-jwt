@@ -7,7 +7,6 @@ use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Data\DataBag;
 use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\AbstractSigningMethod;
-use LogicException;
 
 class Token
 {
@@ -156,7 +155,7 @@ class Token
      * @param string $name
      * @param mixed $value
      *
-     * @throws LogicException
+     * @throws DataGuardedException
      *
      * @return $this
      */

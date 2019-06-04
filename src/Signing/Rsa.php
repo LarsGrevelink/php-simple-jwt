@@ -64,6 +64,8 @@ abstract class Rsa extends AbstractSigningMethod
 
     /**
      * @inheritdoc
+     *
+     * @throws SigningException
      */
     public function sign(string $data, ?string $key = null)
     {
@@ -87,6 +89,8 @@ abstract class Rsa extends AbstractSigningMethod
 
     /**
      * @inheritdoc
+     *
+     * @throws SigningException
      */
     public function verify(string $expected, string $data, ?string $key = null)
     {
