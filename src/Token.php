@@ -48,7 +48,7 @@ class Token
      * @param array $header (optional)
      * @param string $signature (optional)
      */
-    public function __construct(array $payload = null, array $header = null, string $signature = null)
+    public function __construct(?array $payload = null, ?array $header = null, ?string $signature = null)
     {
         $this->payload = new DataBag($payload ?? []);
         $this->header = new DataBag(array_merge([
