@@ -78,8 +78,6 @@ abstract class TokenBlueprint
 
             if (method_exists($token, $methodName)) {
                 $token->{$methodName}($value);
-            } else {
-                $token->setPayload($claim, $value);
             }
         }
 

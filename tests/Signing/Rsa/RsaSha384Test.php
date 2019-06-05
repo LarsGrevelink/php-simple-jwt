@@ -11,7 +11,7 @@ final class RsaSha384Test extends RsaTest
     {
         parent::setUp();
 
-        $this->rsa = new RsaSha384($this->privateKey, $this->publicKey);
+        $this->rsa = new RsaSha384();
     }
 
     public function testAlgortithm()

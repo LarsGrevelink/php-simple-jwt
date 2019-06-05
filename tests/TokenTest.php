@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
 
@@ -51,6 +52,8 @@ final class TokenTest extends TestCase
         ]);
 
         $this->assertSame('payload', $token->getPayload('test'));
+        $this->assertSame(null, $token->getPayload('unknown'));
+        $this->assertSame('fallback', $token->getPayload('unknown', 'fallback'));
     }
 
     public function testSetPayload()
@@ -68,11 +71,29 @@ final class TokenTest extends TestCase
         $this->assertSame('override', $token->getPayload('test'));
     }
 
+    public function testSetPayloadAlreadySignedException()
+    {
+        $this->expectException(DataGuardedException::class);
+        $this->expectExceptionMessage('Token needs to be unsigned before the payload can be changed');
+
+        $token = new Token(null, null, 'signature');
+        $token->setPayload('test', 'payload');
+    }
+
     public function testGettersSetters()
     {
         $time = time();
 
         $token = new Token();
+
+        $this->assertSame(null, $token->getAudience());
+        $this->assertSame(null, $token->getExpirationTime());
+        $this->assertSame(null, $token->getIssuedAt());
+        $this->assertSame(null, $token->getIssuer());
+        $this->assertSame(null, $token->getJwtId());
+        $this->assertSame(null, $token->getNotBefore());
+        $this->assertSame(null, $token->getSubject());
+
         $token->setAudience('audience')
             ->setExpirationTime(0)
             ->setIssuedAt(0)

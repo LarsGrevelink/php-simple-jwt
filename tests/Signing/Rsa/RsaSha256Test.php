@@ -11,7 +11,7 @@ final class RsaSha256Test extends RsaTest
     {
         parent::setUp();
 
-        $this->rsa = new RsaSha256($this->privateKey, $this->publicKey);
+        $this->rsa = new RsaSha256();
     }
 
     public function testAlgortithm()

@@ -17,10 +17,6 @@ class KeyTest extends TestCase
     public function setUp(): void
     {
         $this->key = $this->getMockBuilder(Key::class)->setConstructorArgs(['path/to/key.pem'])->setMethods(['loadKey'])->getMockForAbstractClass();
-
-        $this->key->expects(self::any())
-            ->method('loadKey')
-            ->willReturn('preset key');
     }
 
     public function testConstructor()
@@ -30,6 +26,22 @@ class KeyTest extends TestCase
 
     public function testGetKey()
     {
+        $this->key->expects(self::any())
+            ->method('loadKey')
+            ->willReturn('preset key');
+
         $this->assertSame('preset key', $this->key->getKey());
+    }
+
+    public function testLoadKey()
+    {
+        $key = $this->getMockBuilder(Key::class)->setConstructorArgs([__FILE__])->getMockForAbstractClass();
+
+        $this->assertSame(file_get_contents(__FILE__), $key->getKey());
+    }
+
+    public function testLoadKeyInvalid()
+    {
+        $this->assertNull($this->key->getKey());
     }
 }

@@ -11,7 +11,7 @@ final class RsaSha512Test extends RsaTest
     {
         parent::setUp();
 
-        $this->rsa = new RsaSha512($this->privateKey, $this->publicKey);
+        $this->rsa = new RsaSha512();
     }
 
     public function testAlgortithm()
