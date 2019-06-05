@@ -11,19 +11,19 @@ trait ParsesTokens
      *
      * @param string $data
      *
-     * @return string
+     * @return string|null
      */
     protected static function base64UrlDecode(string $data)
     {
-        return base64_decode(strtr($data, '-_', '+/'));
+        return base64_decode(strtr($data, '-_', '+/')) ?: null;
     }
 
     /**
-     * Decodes an encoded base64 data bag to its former self.
+     * Decodes a stringified DataBag representation to an object.
      *
      * @param string $data
      *
-     * @return array
+     * @return array|null
      */
     protected static function decodeDataBag(string $data)
     {
@@ -31,7 +31,7 @@ trait ParsesTokens
     }
 
     /**
-     * Parse as JWT Token.
+     * Parses a stringified Token representation to its former Token self.
      *
      * @param string $token
      *

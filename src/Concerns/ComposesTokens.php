@@ -19,7 +19,7 @@ trait ComposesTokens
     }
 
     /**
-     * Convert to string.
+     * Encodes a DataBag object to a string.
      *
      * @param DataBag $bag
      *
@@ -33,7 +33,7 @@ trait ComposesTokens
     }
 
     /**
-     * Compose a token from the three signature parts.
+     * Composes a stringified version of the token.
      *
      * @param DataBag $header
      * @param DataBag $payload

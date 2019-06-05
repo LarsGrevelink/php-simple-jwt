@@ -21,7 +21,7 @@ abstract class Hmac extends AbstractSigningMethod
     }
 
     /**
-     * Retrieve the HMAC algorithm.
+     * Retrieves the HMAC algorithm.
      *
      * @return string
      */

@@ -35,7 +35,7 @@ abstract class Rsa extends AbstractSigningMethod
     }
 
     /**
-     * Set a RSA private key for the encryption.
+     * Sets an RSA private key used for encryption.
      *
      * @param PrivateKey $privateKey
      *
@@ -49,7 +49,7 @@ abstract class Rsa extends AbstractSigningMethod
     }
 
     /**
-     * Set a RSA public key for the encryption.
+     * Sets an RSA public key used for decryption.
      *
      * @param PublicKey $publicKey
      *
@@ -107,9 +107,9 @@ abstract class Rsa extends AbstractSigningMethod
     }
 
     /**
-     * Retrieve the RSA algorithm.
+     * Retrieves the RSA algorithm.
      *
-     * @return string
+     * @return int
      */
     abstract public function getAlgorithm();
 }

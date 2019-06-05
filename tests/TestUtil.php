@@ -46,7 +46,7 @@ class TestUtil
      *
      * @param object $instance
      * @param string $methodName
-     * @param array $arguments
+     * @param array $arguments (optional)
      *
      * @return mixed
      */
@@ -63,7 +63,7 @@ class TestUtil
      *
      * @param string $className
      * @param string $methodName
-     * @param array $arguments
+     * @param array $arguments (optional)
      *
      * @return mixed
      */

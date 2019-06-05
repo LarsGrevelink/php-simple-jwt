@@ -16,7 +16,7 @@ final class DataBag implements JsonSerializable
     /**
      * Constructor.
      *
-     * @param array $items
+     * @param array $items (optional)
      */
     public function __construct(array $items = [])
     {
@@ -34,10 +34,11 @@ final class DataBag implements JsonSerializable
     }
 
     /**
-     * Returns a specific item in the bag.
+     * Returns a specific item in the bag. If the item does not exists, the
+     * default value is returned.
      *
      * @param string $name
-     * @param mixed|null $default
+     * @param mixed|null $default (optional)
      *
      * @return mixed
      */
@@ -63,7 +64,7 @@ final class DataBag implements JsonSerializable
     }
 
     /**
-     * Drops an item in the bag.
+     * Puts an item in the bag.
      *
      * @param string $name
      * @param mixed $value

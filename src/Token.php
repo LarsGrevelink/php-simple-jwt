@@ -62,7 +62,7 @@ class Token
      * Gets a claim on the token's payload.
      *
      * @param string $name
-     * @param mixed $default
+     * @param mixed $default (optional)
      *
      * @return mixed
      */
@@ -73,9 +73,9 @@ class Token
 
     /**
      * Gets the audience claim from the token's payload. This claim identifies the
-     * recipients that the JWT is intended for.
+     * recipient that the JWT is intended for.
      *
-     * @return string
+     * @return string|null
      */
     public function getAudience()
     {
@@ -86,7 +86,7 @@ class Token
      * Gets the "expiration time" claim from the token's payload. This claim identifies the
      * expiration time on or after which the JWT MUST NOT be accepted for processing.
      *
-     * @return int
+     * @return int|null
      */
     public function getExpirationTime()
     {
@@ -97,7 +97,7 @@ class Token
      * Gets the "issued at" claim from the token's payload. This claim identifies the
      * time at which the JWT was issued.
      *
-     * @return int
+     * @return int|null
      */
     public function getIssuedAt()
     {
@@ -108,7 +108,7 @@ class Token
      * Gets the "issuer" claim from the token's payload. This claim identifies the principal
      * that issued the JWT.
      *
-     * @return string
+     * @return string|null
      */
     public function getIssuer()
     {
@@ -119,7 +119,7 @@ class Token
      * Gets the "JWT ID" claim from the token's payload. This claim provides a unique
      * identifier for the JWT.
      *
-     * @return string
+     * @return string|null
      */
     public function getJwtId()
     {
@@ -130,7 +130,7 @@ class Token
      * Gets the "not before" claim from the token's payload. This claim identifies the time
      * before which the JWT MUST NOT be accepted for processing.
      *
-     * @return int
+     * @return int|null
      */
     public function getNotBefore()
     {
@@ -142,7 +142,7 @@ class Token
      * that is the subject of the JWT. The claims in a JWT are normally statements about
      * the subject.
      *
-     * @return string
+     * @return string|null
      */
     public function getSubject()
     {
@@ -188,7 +188,7 @@ class Token
      * expiration time on or after which the JWT MUST NOT be accepted for processing.
      *
      * @param int $expirationTime
-     * @param bool $relative
+     * @param bool $relative (optional)
      *
      * @return $this
      */
@@ -202,7 +202,7 @@ class Token
      * time at which the JWT was issued.
      *
      * @param int $issuedAt
-     * @param bool $relative
+     * @param bool $relative (optional)
      *
      * @return $this
      */
@@ -242,7 +242,7 @@ class Token
      * before which the JWT MUST NOT be accepted for processing.
      *
      * @param int $notBefore
-     * @param bool $relative
+     * @param bool $relative (optional)
      *
      * @return $this
      */
@@ -266,7 +266,7 @@ class Token
     }
 
     /**
-     * Sign the token with a given signing method.
+     * Signs the token with a given signing method.
      *
      * @param AbstractSigningMethod $method
      * @param string $key
@@ -285,7 +285,7 @@ class Token
     }
 
     /**
-     * Verify the token against its current signature.
+     * Verifies the token against its current signature.
      *
      * @param AbstractSigningMethod $method
      * @param string $key
@@ -300,7 +300,7 @@ class Token
     }
 
     /**
-     * Unsign the token.
+     * Unsigns the token.
      *
      * @return $this
      */
@@ -313,7 +313,7 @@ class Token
     }
 
     /**
-     * Get the token's textual representation.
+     * Composes the token's textual representation.
      *
      * @return string
      */
@@ -323,7 +323,7 @@ class Token
     }
 
     /**
-     * Stringify the token class.
+     * Returns the stringified version of the token class.
      *
      * @return string
      */

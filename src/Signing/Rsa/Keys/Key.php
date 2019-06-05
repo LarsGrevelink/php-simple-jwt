@@ -12,7 +12,7 @@ abstract class Key
     protected $path;
 
     /**
-     * RSA key.
+     * Contents of the RSA key.
      *
      * @var string
      */
@@ -43,7 +43,7 @@ abstract class Key
     }
 
     /**
-     * Gets the RSA key contents.
+     * Loads the RSA key from the known path.
      *
      * @return string|null
      */
