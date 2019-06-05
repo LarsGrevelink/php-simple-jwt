@@ -2,6 +2,7 @@
 
 namespace LGrevelink\SimpleJWT\Concerns;
 
+use LGrevelink\SimpleJWT\Exceptions\InvalidFormatException;
 use LGrevelink\SimpleJWT\Token;
 
 trait ParsesTokens
@@ -35,15 +36,21 @@ trait ParsesTokens
      *
      * @param string $token
      *
+     * @throws InvalidFormatException
+     *
      * @return Token
      */
     public static function parse(string $token)
     {
-        [$header, $payload, $signature] = explode('.', trim($token, '.'));
+        if (!preg_match('/^([A-z0-9-_]+)\.([A-z0-9-_]+)\.([A-z0-9-_]+)?$/', $token)) {
+            throw new InvalidFormatException('Invalid token format');
+        }
+
+        [$header, $payload, $signature] = explode('.', $token);
 
         return new Token(
-            $payload ? self::decodeDataBag($payload) : null,
-            $header ? self::decodeDataBag($header) : null,
+            self::decodeDataBag($payload),
+            self::decodeDataBag($header),
             $signature ? self::base64UrlDecode($signature) : null
         );
     }
