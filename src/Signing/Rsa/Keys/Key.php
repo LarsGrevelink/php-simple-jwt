@@ -49,8 +49,6 @@ abstract class Key
      */
     public function loadKey()
     {
-        if ($contents = file_get_contents($this->path)) {
-            return $contents;
-        }
+        return file_get_contents($this->path) ?: null;
     }
 }
