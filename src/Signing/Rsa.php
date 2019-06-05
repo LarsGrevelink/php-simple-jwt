@@ -3,6 +3,7 @@
 namespace LGrevelink\SimpleJWT\Signing;
 
 use LGrevelink\SimpleJWT\Exceptions\SigningException;
+use LGrevelink\SimpleJWT\Exceptions\VerificationException;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PrivateKey;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PublicKey;
 
@@ -95,12 +96,12 @@ abstract class Rsa extends AbstractSigningMethod
     public function verify(string $expected, string $data, ?string $key = null)
     {
         if ($this->publicKey === null) {
-            throw new SigningException('A public key is needed for RSA token verification');
+            throw new VerificationException('A public key is needed for RSA token verification');
         }
 
         $publicKey = openssl_pkey_get_public($this->publicKey->getKey());
         if ($publicKey === false) {
-            throw new SigningException('An error occurred while getting the RSA public key; ' . openssl_error_string());
+            throw new VerificationException('An error occurred while getting the RSA public key; ' . openssl_error_string());
         }
 
         return (bool) openssl_verify($data, $expected, $publicKey, $this->getAlgorithm());
