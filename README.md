@@ -4,11 +4,11 @@ Simple package for encoding and decoding JSON Web Tokens (JWT) and using them in
 
 Supported encryption methods;
 
-| HMAC    | RSA     | ECDSA   | RSASSA-PSS |
-| ------- | ------- | ------- | ---------- |
-| ✅HS256 | ✅RS256 | ✕ ES256 | ✕ PS256    |
-| ✅HS384 | ✅RS384 | ✕ ES384 | ✕ PS384    |
-| ✅HS512 | ✅RS512 | ✕ ES512 | ✕ PS512    |
+| HMAC     | RSA      | ECDSA   | RSASSA-PSS |
+| -------- | -------- | ------- | ---------- |
+| ✅ HS256 | ✅ RS256 | ✕ ES256 | ✕ PS256    |
+| ✅ HS384 | ✅ RS384 | ✕ ES384 | ✕ PS384    |
+| ✅ HS512 | ✅ RS512 | ✕ ES512 | ✕ PS512    |
 
 
 ## Installation
@@ -36,7 +36,7 @@ $token->toString();
 
 ## Example with blueprints
 
-Blueprints makes generating and validating the already created tokens easier. They act as an abstract version of your actual token and will setup all the general claims when defined.
+Blueprints make generating and validating the already created tokens easier. They act as an abstract version of your actual token and will set up all the general claims when defined.
 
 ```php
 use LGrevelink\SimpleJWT\TokenBlueprint;
@@ -63,7 +63,7 @@ MyToken::validate($token);
 // > true
 ```
 
-All date related parameters in the blueprints are relative to the current time on the system.
+All date-related parameters in the blueprints are treated relative to the current time on the system.
 
 
 ## Signing & verifying
@@ -109,7 +109,7 @@ $token->verify(new RsaSha256(null, $publicKey));
 
 ## Parsing tokens
 
-This part should be easy as  🍰. Just throw in your stringified token and it should be ready to use after parsing. If a token or a part of the token cannot be parsed it will default back to the default to `null`.
+This part should be easy as  🍰. Just throw in your stringified token and it should be ready to use after parsing. If a given token is not parseable, an `InvalidFormatException` is thrown. In case a part of the token cannot be parsed it will default back to the default of `null`.
 
 ```php
 use LGrevelink\SimpleJWT\Token;
@@ -120,7 +120,7 @@ $token = Token::parse('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.W10.o5-rpJi4_bEYcIWi
 
 ## Tests
 
-Tests are written with PHPUnit and can be ran via the following composer command;
+Tests are written with PHPUnit and can be run via the following composer command;
 
 ```bash
 composer run test
