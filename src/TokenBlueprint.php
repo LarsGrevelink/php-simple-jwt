@@ -92,49 +92,61 @@ abstract class TokenBlueprint
      *
      * @return bool
      */
-    public static function validate(Token $token, $claims = [])
+    public static function validate(Token $token, array $claims = [])
     {
-        $blueprintClaims = self::getBlueprintClaims();
-        $now = time();
-
-        foreach ($blueprintClaims as $claim => $value) {
-            $methodName = self::getGetterMethod($claim);
-            $tokenValue = $token->{$methodName}();
-
-            switch ($claim) {
-                case 'audience':
-                case 'issuer':
-                case 'jwtId':
-                case 'subject':
-                    if ($tokenValue !== $value) {
-                        return false;
-                    }
-
-                    break;
-                case 'issuedAt':
-                case 'notBefore':
-                    if ($now < $tokenValue) {
-                        return false;
-                    }
-
-                    break;
-                case 'expirationTime':
-
-                    if ($now > $tokenValue) {
-                        return false;
-                    }
-
-                    break;
-            }
-        }
+        $claims = array_merge(self::getBlueprintClaims(), $claims);
 
         foreach ($claims as $claim => $value) {
-            if ($token->getPayload($claim) !== $value) {
+            $tokenValue = self::getTokenValue($token, $claim);
+
+            if (!self::validateClaim($claim, $value, $tokenValue)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Get the token value of a specific claim via a known getter or directly
+     * from the payload.
+     *
+     * @param Token $token
+     * @param string $claim
+     *
+     * @return mixed
+     */
+    protected static function getTokenValue(Token $token, string $claim)
+    {
+        $methodName = self::getGetterMethod($claim);
+
+        if (method_exists($token, $methodName)) {
+            return $token->{$methodName}();
+        }
+
+        return $token->getPayload($claim);
+    }
+
+    /**
+     * Validate a specific claim against predefined rules.
+     *
+     * @param string $claim
+     * @param mixed $expected
+     * @param mixed $actual
+     *
+     * @return bool
+     */
+    protected static function validateClaim(string $claim, $expected, $actual)
+    {
+        if (in_array($claim, ['expirationTime'])) {
+            return time() < $actual;
+        }
+
+        if (in_array($claim, ['issuedAt', 'notBefore'])) {
+            return time() >= $actual;
+        }
+
+        return $expected === $actual;
     }
 
     /**

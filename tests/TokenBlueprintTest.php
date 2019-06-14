@@ -169,4 +169,50 @@ final class TokenBlueprintTest extends TestCase
             'some' => 'other claim',
         ]));
     }
+
+    public function testGetTokenValue()
+    {
+        $token = AudienceBlueprintMock::generate();
+
+        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'audience']);
+
+        $this->assertSame('Tests', $audienceValue);
+
+        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'aud']);
+
+        $this->assertSame('Tests', $audienceValue);
+
+        $unknownValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'unknown']);
+
+        $this->assertNull($unknownValue);
+    }
+
+    public function testValidateClaim()
+    {
+        $now = time();
+
+        $expirationTimeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now + 10]);
+        $expirationTimeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now - 10]);
+
+        $this->assertTrue($expirationTimeTrue);
+        $this->assertFalse($expirationTimeFalse);
+
+        $issuedAtTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now - 10]);
+        $issuedAtFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now + 10]);
+
+        $this->assertTrue($issuedAtTrue);
+        $this->assertFalse($issuedAtFalse);
+
+        $notBeforeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now - 10]);
+        $notBeforeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now + 10]);
+
+        $this->assertTrue($notBeforeTrue);
+        $this->assertFalse($notBeforeFalse);
+
+        $othersTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', '12345']);
+        $othersFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', 12345]);
+
+        $this->assertTrue($othersTrue);
+        $this->assertFalse($othersFalse);
+    }
 }
