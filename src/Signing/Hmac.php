@@ -2,7 +2,7 @@
 
 namespace LGrevelink\SimpleJWT\Signing;
 
-abstract class Hmac extends AbstractSigningMethod
+abstract class Hmac extends SigningMethod
 {
     /**
      * @inheritdoc

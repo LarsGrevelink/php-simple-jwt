@@ -6,7 +6,7 @@ use LGrevelink\SimpleJWT\Concerns\ComposesTokens;
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Data\DataBag;
 use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
-use LGrevelink\SimpleJWT\Signing\AbstractSigningMethod;
+use LGrevelink\SimpleJWT\Signing\SigningMethod;
 
 class Token
 {
@@ -268,12 +268,12 @@ class Token
     /**
      * Signs the token with a given signing method.
      *
-     * @param AbstractSigningMethod $method
+     * @param SigningMethod $method
      * @param string $key
      *
      * @return $this
      */
-    public function sign(AbstractSigningMethod $method, string $key)
+    public function sign(SigningMethod $method, string $key)
     {
         $this->header->set(self::JWT_HEADER_ALGORITHM, $method->getAlgorithmId());
 
@@ -287,12 +287,12 @@ class Token
     /**
      * Verifies the token against its current signature.
      *
-     * @param AbstractSigningMethod $method
+     * @param SigningMethod $method
      * @param string $key
      *
      * @return bool
      */
-    public function verify(AbstractSigningMethod $method, string $key)
+    public function verify(SigningMethod $method, string $key)
     {
         $data = rtrim($this->compose($this->header, $this->payload), '.');
 

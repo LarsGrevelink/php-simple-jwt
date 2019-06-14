@@ -7,7 +7,7 @@ use LGrevelink\SimpleJWT\Exceptions\VerificationException;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PrivateKey;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PublicKey;
 
-abstract class Rsa extends AbstractSigningMethod
+abstract class Rsa extends SigningMethod
 {
     /**
      * The RSA private key.

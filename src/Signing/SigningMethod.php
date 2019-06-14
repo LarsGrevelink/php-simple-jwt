@@ -2,7 +2,7 @@
 
 namespace LGrevelink\SimpleJWT\Signing;
 
-abstract class AbstractSigningMethod
+abstract class SigningMethod
 {
     /**
      * Retrieves the JWT header algorithm identifier.
