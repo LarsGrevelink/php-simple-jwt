@@ -2,8 +2,6 @@
 
 namespace LGrevelink\SimpleJWT\Exceptions;
 
-use Exception;
-
-class SigningException extends Exception
+class SigningException extends SimpleJwtException
 {
 }
