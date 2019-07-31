@@ -4,6 +4,6 @@ namespace LGrevelink\SimpleJWT\Exceptions;
 
 use Exception;
 
-class SimpleJwtException extends Exception
+abstract class SimpleJwtException extends Exception
 {
 }
