@@ -4,7 +4,7 @@ namespace LGrevelink\SimpleJWT\Signing\Rsa;
 
 use LGrevelink\SimpleJWT\Signing\Rsa;
 
-class RsaSha384 extends Rsa
+final class RsaSha384 extends Rsa
 {
     /**
      * @inheritdoc

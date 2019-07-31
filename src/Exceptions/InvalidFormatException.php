@@ -2,6 +2,6 @@
 
 namespace LGrevelink\SimpleJWT\Exceptions;
 
-class InvalidFormatException extends SimpleJwtException
+final class InvalidFormatException extends SimpleJwtException
 {
 }

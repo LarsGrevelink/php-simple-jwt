@@ -2,6 +2,6 @@
 
 namespace LGrevelink\SimpleJWT\Exceptions;
 
-class DataGuardedException extends SimpleJwtException
+final class DataGuardedException extends SimpleJwtException
 {
 }

@@ -2,6 +2,6 @@
 
 namespace LGrevelink\SimpleJWT\Exceptions;
 
-class VerificationException extends SimpleJwtException
+final class VerificationException extends SimpleJwtException
 {
 }

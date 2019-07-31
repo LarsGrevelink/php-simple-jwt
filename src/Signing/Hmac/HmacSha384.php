@@ -4,7 +4,7 @@ namespace LGrevelink\SimpleJWT\Signing\Hmac;
 
 use LGrevelink\SimpleJWT\Signing\Hmac;
 
-class HmacSha384 extends Hmac
+final class HmacSha384 extends Hmac
 {
     /**
      * @inheritdoc
