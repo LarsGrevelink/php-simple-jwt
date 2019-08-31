@@ -24,7 +24,7 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit --colors=always --do-not-cache-result"
+        "test": "vendor/bin/phpunit --colors=always"
     },
     "minimum-stability": "stable"
 }
