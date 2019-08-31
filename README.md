@@ -109,7 +109,7 @@ $token->verify(new RsaSha256(null, $publicKey));
 
 ## Parsing tokens
 
-This part should be easy as  🍰. Just throw in your stringified token and it should be ready to use after parsing. If a given token is not parseable, an `InvalidFormatException` is thrown. In case a part of the token cannot be parsed it will default back to the default of `null`.
+This part should be easy as  🍰. Just throw in your stringified token and it should be ready to use after parsing. If the given token or a part of the token cannot be properly parsed or decoded, an `InvalidFormatException` is thrown.
 
 ```php
 use LGrevelink\SimpleJWT\Token;
