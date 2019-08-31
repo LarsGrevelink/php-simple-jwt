@@ -26,6 +26,16 @@ final class ParsesTokensTest extends TestCase
         $this->assertSame('Ωç√-signature', $result);
     }
 
+    public function testBase64UrlDecodeInvalidFormat()
+    {
+        $this->expectException(InvalidFormatException::class);
+        $this->expectExceptionMessage('Failed databag decoding');
+
+        TestUtil::invokeMethod($this->trait, 'base64UrlDecode', [
+            'Ωç√-string-which-fails-base64-decoding',
+        ]);
+    }
+
     public function testDecodeDataBag()
     {
         $databag = TestUtil::invokeMethod($this->trait, 'decodeDataBag', [
@@ -33,6 +43,16 @@ final class ParsesTokensTest extends TestCase
         ]);
 
         $this->assertSame(['header' => 'bag'], $databag);
+    }
+
+    public function testDecodeDataBagInvalidFormat()
+    {
+        $this->expectException(InvalidFormatException::class);
+        $this->expectExceptionMessage('Failed databag parsing');
+
+        TestUtil::invokeMethod($this->trait, 'decodeDataBag', [
+            'string-which-fails-json-decoding',
+        ]);
     }
 
     public function testParse()

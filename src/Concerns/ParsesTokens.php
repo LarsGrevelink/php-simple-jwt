@@ -12,11 +12,19 @@ trait ParsesTokens
      *
      * @param string $data
      *
-     * @return string|null
+     * @throws InvalidFormatException
+     *
+     * @return string
      */
     protected static function base64UrlDecode(string $data)
     {
-        return base64_decode(strtr($data, '-_', '+/')) ?: null;
+        $decodedData = base64_decode(strtr($data, '-_', '+/'), true);
+
+        if (!$decodedData) {
+            throw new InvalidFormatException('Failed databag decoding');
+        }
+
+        return $decodedData;
     }
 
     /**
@@ -24,11 +32,19 @@ trait ParsesTokens
      *
      * @param string $data
      *
-     * @return array|null
+     * @throws InvalidFormatException
+     *
+     * @return array
      */
     protected static function decodeDataBag(string $data)
     {
-        return json_decode(self::base64UrlDecode($data), true);
+        $data = json_decode(self::base64UrlDecode($data), true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new InvalidFormatException('Failed databag parsing');
+        }
+
+        return $data;
     }
 
     /**
