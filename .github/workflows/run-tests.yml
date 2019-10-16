@@ -23,6 +23,7 @@ jobs:
       uses: shivammathur/setup-php@master
       with:
         php-version: ${{ matrix.php-versions }}
+        extension-csv: xml
     - name: Check PHP Version
       run: php -v
     - name: Install composer
