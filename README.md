@@ -1,5 +1,10 @@
 # PHP Simple JWT
 
+[![Test Suite Status](https://github.com/larsgrevelink/php-simple-jwt/workflows/Test%20Suite/badge.svg)](https://github.com/larsgrevelink/php-simple-jwt)
+[![Total Downloads](https://poser.pugx.org/lgrevelink/php-simple-jwt/d/total.svg)](https://packagist.org/packages/lgrevelink/php-simple-jwt)
+[![Latest Stable Version](https://poser.pugx.org/lgrevelink/php-simple-jwt/v/stable.svg)](https://packagist.org/packages/lgrevelink/php-simple-jwt)
+[![License](https://poser.pugx.org/lgrevelink/php-simple-jwt/license.svg)](https://github.com/larsgrevelink/php-simple-jwt)
+
 Simple package for encoding and decoding JSON Web Tokens (JWT) and using them in a PHP application. More information can be found in [RFC 7519](https://tools.ietf.org/html/rfc7519).
 
 Supported encryption methods;
