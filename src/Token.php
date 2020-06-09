@@ -285,6 +285,18 @@ class Token
     }
 
     /**
+     * Signs the token with the given signature.
+     *
+     * @param TokenSignature $signature
+     *
+     * @return $this
+     */
+    public function signature(TokenSignature $signature)
+    {
+        return $this->sign($signature->signMethod(), $signature->signatureKey());
+    }
+
+    /**
      * Verifies the token against its current signature.
      *
      * @param SigningMethod $method

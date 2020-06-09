@@ -5,6 +5,7 @@ namespace Tests;
 use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
+use LGrevelink\SimpleJWT\TokenSignature;
 
 final class TokenTest extends TestCase
 {
@@ -140,6 +141,17 @@ final class TokenTest extends TestCase
         $token->unsign();
 
         $this->assertNull(TestUtil::getProperty($token, 'signature'));
+    }
+
+    public function testSignature()
+    {
+        $algorithm = new HmacSha256();
+
+        $token = new Token();
+        $token->signature(new TokenSignature($algorithm, 'very secret key'));
+
+        $this->assertSame($algorithm->getAlgorithmId(), TestUtil::getProperty($token, 'header')->get('alg'), 'Token should have the correct algorithm ID');
+        $this->assertNotNull(TestUtil::getProperty($token, 'signature'), 'Token should contain a signature');
     }
 
     public function testConvertRelativeTime()
