@@ -2,7 +2,7 @@
 
 namespace LGrevelink\SimpleJWT\Concerns;
 
-use LGrevelink\SimpleJWT\Exceptions\InvalidFormatException;
+use LGrevelink\SimpleJWT\Exceptions\Token\InvalidFormatException;
 use LGrevelink\SimpleJWT\Token;
 
 trait ParsesTokens
