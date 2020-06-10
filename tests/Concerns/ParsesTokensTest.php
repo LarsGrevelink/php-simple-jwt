@@ -3,7 +3,7 @@
 namespace Tests\Data;
 
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
-use LGrevelink\SimpleJWT\Exceptions\InvalidFormatException;
+use LGrevelink\SimpleJWT\Exceptions\Token\InvalidFormatException;
 use LGrevelink\SimpleJWT\Token;
 use Tests\TestCase;
 use Tests\TestUtil;

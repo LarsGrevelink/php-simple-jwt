@@ -8,7 +8,7 @@ use LGrevelink\SimpleJWT\Claims\NotBeforeClaim;
 use LGrevelink\SimpleJWT\Concerns\ComposesTokens;
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Data\DataBag;
-use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
+use LGrevelink\SimpleJWT\Exceptions\Token\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\SigningMethod;
 
 class Token

@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
+use LGrevelink\SimpleJWT\Exceptions\Token\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
 use Tests\Mocks\Claims\SomeClaimMock;
