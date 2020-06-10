@@ -95,6 +95,12 @@ final class TokenBlueprintTest extends TestCase
         ], 'custom-key');
 
         $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZGRpdGlvbmFsIjoiY2xhaW0ifQ.C7bk4bT1GtU3q8ByI6dqhelAqEEzf4FqOpQjksUgsOo');
+
+        $tokenVerification = SignatureBlueprintMock::generate([
+            'additional' => 'claim',
+        ])->signature(SignatureBlueprintMock::signature('custom-key'));
+
+        $this->assertSame($token->toString(), $tokenVerification->toString());
     }
 
     public function testSignature()

@@ -111,6 +111,35 @@ $token->verify(new RsaSha256(null, $publicKey));
 // true
 ```
 
+### Through blueprints
+
+The signature can also be attached to a `TokenBlueprint` to keep everything contained in the blueprint instead of somewhere in application code.
+
+```php
+use LGrevelink\SimpleJWT\TokenBlueprint;
+use LGrevelink\SimpleJWT\TokenSignature;
+
+class MyToken extends TokenBlueprint
+{
+    // ...
+
+    public function signature($key) {
+        return new TokenSignature(new HmacSha(), md5($key));
+    }
+}
+
+$token = MyToken::generate([
+    'custom-claim' => 'data'
+])->signature(MyToken::signature('some-key'));
+
+// or
+
+$token = MyToken::generateAndSign([
+    'custom-claim' => 'data'
+], 'some-key');
+```
+
+All arguments after the custom claims passed to `TokenBlueprint::generateAndSign` will be proxied to the `TokenBlueprint::signature` method so they can be used there.
 
 ## Parsing tokens
 
