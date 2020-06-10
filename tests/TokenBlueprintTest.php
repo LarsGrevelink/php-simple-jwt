@@ -2,7 +2,10 @@
 
 namespace Tests;
 
+use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
+use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\TokenBlueprint;
+use LGrevelink\SimpleJWT\TokenSignature;
 use Tests\Mocks\Blueprints\AudienceBlueprintMock;
 use Tests\Mocks\Blueprints\EmptyBlueprintMock;
 use Tests\Mocks\Blueprints\ExpirationTimeBlueprintMock;
@@ -11,6 +14,7 @@ use Tests\Mocks\Blueprints\IssuedAtBlueprintMock;
 use Tests\Mocks\Blueprints\IssuerBlueprintMock;
 use Tests\Mocks\Blueprints\JwtIdBlueprintMock;
 use Tests\Mocks\Blueprints\NotBeforeBlueprintMock;
+use Tests\Mocks\Blueprints\SignatureBlueprintMock;
 use Tests\Mocks\Blueprints\SubjectBlueprintMock;
 
 final class TokenBlueprintTest extends TestCase
@@ -76,6 +80,43 @@ final class TokenBlueprintTest extends TestCase
 
         // Custom claims
         $this->assertSame('claim', $token->getPayload('additional'));
+    }
+
+    public function testGenerateAndSign()
+    {
+        $token = SignatureBlueprintMock::generateAndSign([
+            'additional' => 'claim',
+        ]);
+
+        $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZGRpdGlvbmFsIjoiY2xhaW0ifQ.fzZBLQfFRdMzDzJbgNc-0iVOi2UuyTLhFVZqgqUbUU0');
+
+        $token = SignatureBlueprintMock::generateAndSign([
+            'additional' => 'claim',
+        ], 'custom-key');
+
+        $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZGRpdGlvbmFsIjoiY2xhaW0ifQ.C7bk4bT1GtU3q8ByI6dqhelAqEEzf4FqOpQjksUgsOo');
+    }
+
+    public function testSignature()
+    {
+        $defaultValueSignature = SignatureBlueprintMock::signature();
+
+        $this->assertInstanceOf(TokenSignature::class, $defaultValueSignature);
+        $this->assertSame('default-key', $defaultValueSignature->signatureKey());
+
+        $customValueSignature = SignatureBlueprintMock::signature('custom-key');
+
+        $this->assertInstanceOf(TokenSignature::class, $customValueSignature);
+        $this->assertSame('custom-key', $customValueSignature->signatureKey());
+    }
+
+    public function testSignatureWithoutOverride()
+    {
+        $this->expectException(SignatureNotImplementedException::class);
+        $this->expectExceptionMessage(sprintf('Missing signature implementation on %s', EmptyBlueprintMock::class));
+
+        EmptyBlueprintMock::signature(new TokenSignature(new HmacSha256(), 'key'));
+        EmptyBlueprintMock::generateAndSign();
     }
 
     public function testValidateAudience()

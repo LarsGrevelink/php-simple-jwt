@@ -2,6 +2,8 @@
 
 namespace LGrevelink\SimpleJWT;
 
+use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
+
 /**
  * Blueprint class for JWT tokens. Used to generate a basic token and pre-fill
  * registered claims.
@@ -82,6 +84,37 @@ abstract class TokenBlueprint
         }
 
         return $token;
+    }
+
+    /**
+     * Generate a token and sign it based on the blueprint.
+     *
+     * @param array $claims
+     * @param array ...$signatureArguments
+     *
+     * @return Token
+     */
+    public static function generateAndSign(array $claims = [])
+    {
+        $signatureArguments = array_slice(func_get_args(), 1);
+
+        return static::generate($claims)->signature(
+            forward_static_call_array([static::class, 'signature'], $signatureArguments)
+        );
+    }
+
+    /**
+     * Generate a signature for a token.
+     *
+     * @throws SignatureNotImplementedException
+     *
+     * @return TokenSignature
+     */
+    public static function signature()
+    {
+        throw new SignatureNotImplementedException(
+            sprintf('Missing signature implementation on %s', static::class)
+        );
     }
 
     /**
