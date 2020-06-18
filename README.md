@@ -118,13 +118,14 @@ The signature can also be attached to a `TokenBlueprint` to keep everything cont
 ```php
 use LGrevelink\SimpleJWT\TokenBlueprint;
 use LGrevelink\SimpleJWT\TokenSignature;
+use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 
 class MyToken extends TokenBlueprint
 {
     // ...
 
     public function signature($key) {
-        return new TokenSignature(new HmacSha(), md5($key));
+        return new TokenSignature(new HmacSha256(), $key);
     }
 }
 
