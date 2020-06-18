@@ -145,13 +145,14 @@ final class TokenTest extends TestCase
 
     public function testSignature()
     {
-        $algorithm = new HmacSha256();
+        $signature = new TokenSignature(new HmacSha256(), 'very secret key');
 
         $token = new Token();
-        $token->signature(new TokenSignature($algorithm, 'very secret key'));
+        $token->signature($signature);
 
-        $this->assertSame($algorithm->getAlgorithmId(), TestUtil::getProperty($token, 'header')->get('alg'), 'Token should have the correct algorithm ID');
+        $this->assertSame($signature->signMethod()->getAlgorithmId(), TestUtil::getProperty($token, 'header')->get('alg'));
         $this->assertNotNull(TestUtil::getProperty($token, 'signature'), 'Token should contain a signature');
+        $this->assertTrue($token->verify($signature->signMethod(), $signature->signatureKey()));
     }
 
     public function testConvertRelativeTime()
