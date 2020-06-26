@@ -90,7 +90,7 @@ abstract class TokenBlueprint
      * Generate a token and sign it based on the blueprint.
      *
      * @param array $claims
-     * @param array ...$signatureArguments
+     * @param ...$signatureArguments
      *
      * @return Token
      */
@@ -98,8 +98,11 @@ abstract class TokenBlueprint
     {
         $signatureArguments = array_slice(func_get_args(), 1);
 
-        return static::generate($claims)->signature(
-            forward_static_call_array([static::class, 'signature'], $signatureArguments)
+        $signature = static::signature(...$signatureArguments);
+
+        return static::generate($claims)->sign(
+            $signature->signMethod(),
+            $signature->signatureKey()
         );
     }
 
@@ -139,6 +142,23 @@ abstract class TokenBlueprint
 
         return true;
     }
+
+    // /**
+    //  * Verifies a token based on the blueprint.
+    //  *
+    //  * @param Token $token
+    //  * @param ...$signatureArguments
+    //  *
+    //  * @return bool
+    //  */
+    // public static function verify(Token $token)
+    // {
+    //     $signatureArguments = array_slice(func_get_args(), 1);
+
+    //     return $token->verifySignature(
+    //         forward_static_call_array([static::class, 'signature'], $signatureArguments)
+    //     );
+    // }
 
     /**
      * Get the token value of a specific claim via a known getter or directly
