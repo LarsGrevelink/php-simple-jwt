@@ -14,7 +14,7 @@ use Tests\Mocks\Signing\Rsa\Keys\PublicKeyMock;
 use Tests\TestCase;
 use Tests\TestUtil;
 
-class RsaTest extends TestCase
+abstract class RsaTest extends TestCase
 {
     /**
      * @var MockObject|Rsa

@@ -5,7 +5,7 @@ namespace Tests;
 use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
-use LGrevelink\SimpleJWT\TokenSignature;
+use Tests\Mocks\Claims\SomeClaimMock;
 
 final class TokenTest extends TestCase
 {
@@ -55,6 +55,20 @@ final class TokenTest extends TestCase
         $this->assertSame('payload', $token->getPayload('test'));
         $this->assertSame(null, $token->getPayload('unknown'));
         $this->assertSame('fallback', $token->getPayload('unknown', 'fallback'));
+    }
+
+    public function testHasPayload()
+    {
+        $token = new Token([
+            'test' => 'payload',
+        ]);
+
+        $this->assertTrue($token->hasPayload('test'));
+        $this->assertFalse($token->hasPayload('unknown'));
+
+        $token->setPayload('unknown', 'no longer unknown');
+
+        $this->assertTrue($token->hasPayload('unknown'));
     }
 
     public function testSetPayload()
@@ -143,16 +157,69 @@ final class TokenTest extends TestCase
         $this->assertNull(TestUtil::getProperty($token, 'signature'));
     }
 
-    public function testSignature()
+    public function testValidateExpirationTime()
     {
-        $signature = new TokenSignature(new HmacSha256(), 'very secret key');
-
         $token = new Token();
-        $token->signature($signature);
 
-        $this->assertSame($signature->signMethod()->getAlgorithmId(), TestUtil::getProperty($token, 'header')->get('alg'));
-        $this->assertNotNull(TestUtil::getProperty($token, 'signature'), 'Token should contain a signature');
-        $this->assertTrue($token->verify($signature->signMethod(), $signature->signatureKey()));
+        $this->assertTrue($token->validate());
+
+        $token->setExpirationTime(-1);
+
+        $this->assertFalse($token->validate());
+
+        $token->setExpirationTime(3600);
+
+        $this->assertTrue($token->validate());
+    }
+
+    public function testValidateIssuedAt()
+    {
+        $token = new Token();
+
+        $this->assertTrue($token->validate());
+
+        $token->setIssuedAt(3600);
+
+        $this->assertFalse($token->validate());
+
+        $token->setIssuedAt(0);
+
+        $this->assertTrue($token->validate());
+    }
+
+    public function testValidateNotBefore()
+    {
+        $token = new Token();
+
+        $this->assertTrue($token->validate());
+
+        $token->setNotBefore(3600);
+
+        $this->assertFalse($token->validate());
+
+        $token->setNotBefore(0);
+
+        $this->assertTrue($token->validate());
+    }
+
+    public function testValidateCustomClaims()
+    {
+        $token = new Token([
+            'some_claim' => 'some value',
+        ]);
+
+        // Without custom validators
+        $this->assertTrue($token->validate());
+
+        // With correct custom validator
+        $this->assertTrue($token->validate([
+            new SomeClaimMock('some value'),
+        ]));
+
+        // With wrong custom validator
+        $this->assertFalse($token->validate([
+            new SomeClaimMock('some other value'),
+        ]));
     }
 
     public function testConvertRelativeTime()
