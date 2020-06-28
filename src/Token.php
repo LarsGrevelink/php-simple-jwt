@@ -302,6 +302,10 @@ class Token
     /**
      * Signs the token with the given signature.
      *
+     * @todo Decide whether this small utility belongs here due to the tight integration of
+     * signatures and blueprints. Might be better to keep these functionalities in the blueprint
+     * part of the package while keeping the token fully standalone.
+     *
      * @param TokenSignature $signature
      *
      * @return $this
