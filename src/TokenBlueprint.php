@@ -2,6 +2,7 @@
 
 namespace LGrevelink\SimpleJWT;
 
+use LGrevelink\SimpleJWT\Claims\JwtClaim;
 use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
 
 /**
@@ -73,7 +74,7 @@ abstract class TokenBlueprint
     {
         $token = new Token($claims);
 
-        $blueprintClaims = self::getBlueprintClaims();
+        $blueprintClaims = self::getBlueprintClaimValues();
 
         foreach ($blueprintClaims as $claim => $value) {
             $methodName = self::getSetterMethod($claim);
@@ -89,7 +90,7 @@ abstract class TokenBlueprint
     /**
      * Generate a token and sign it based on the blueprint.
      *
-     * @param array $claims
+     * @param array|ClaimContract[] $claims
      * @param ...$signatureArguments
      *
      * @return Token
@@ -124,23 +125,15 @@ abstract class TokenBlueprint
      * Validate a token based on the blueprint.
      *
      * @param Token $token
-     * @param array $claims (optional)
+     * @param ClaimContract[] $claims (optional)
      *
      * @return bool
      */
     public static function validate(Token $token, array $claims = [])
     {
-        $claims = array_merge(self::getBlueprintClaims(), $claims);
-
-        foreach ($claims as $claim => $value) {
-            $tokenValue = self::getTokenValue($token, $claim);
-
-            if (!self::validateClaim($claim, $value, $tokenValue)) {
-                return false;
-            }
-        }
-
-        return true;
+        return $token->validate(
+            array_merge(self::getBlueprintClaims(), $claims)
+        );
     }
 
     // /**
@@ -160,46 +153,17 @@ abstract class TokenBlueprint
     //     );
     // }
 
-    /**
-     * Get the token value of a specific claim via a known getter or directly
-     * from the payload.
-     *
-     * @param Token $token
-     * @param string $claim
-     *
-     * @return mixed
-     */
-    protected static function getTokenValue(Token $token, string $claim)
+    protected static function getBlueprintClaims()
     {
-        $methodName = self::getGetterMethod($claim);
+        $claims = self::getBlueprintClaimValues();
 
-        if (method_exists($token, $methodName)) {
-            return $token->{$methodName}();
+        foreach ($claims as $name => $value) {
+            $claimClass = self::getClaimClassName($name);
+
+            $claims[$name] = new $claimClass($value);
         }
 
-        return $token->getPayload($claim);
-    }
-
-    /**
-     * Validate a specific claim against predefined rules.
-     *
-     * @param string $claim
-     * @param mixed $expected
-     * @param mixed $actual
-     *
-     * @return bool
-     */
-    protected static function validateClaim(string $claim, $expected, $actual)
-    {
-        if (in_array($claim, ['expirationTime'])) {
-            return time() < $actual;
-        }
-
-        if (in_array($claim, ['issuedAt', 'notBefore'])) {
-            return time() >= $actual;
-        }
-
-        return $expected === $actual;
+        return $claims;
     }
 
     /**
@@ -207,7 +171,7 @@ abstract class TokenBlueprint
      *
      * @return array
      */
-    protected static function getBlueprintClaims()
+    protected static function getBlueprintClaimValues()
     {
         $blueprintClaims = array_keys(get_class_vars(self::class));
         $claims = [];
@@ -245,5 +209,13 @@ abstract class TokenBlueprint
     protected static function getSetterMethod(string $name)
     {
         return sprintf('set%s', ucfirst($name));
+    }
+
+    /**
+     * @param string $name
+     */
+    protected static function getClaimClassName(string $name)
+    {
+        return str_replace('\\JwtClaim', sprintf('\\%sClaim', ucfirst($name)), JwtClaim::class);
     }
 }

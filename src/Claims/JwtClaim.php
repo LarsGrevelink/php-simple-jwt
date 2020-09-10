@@ -8,6 +8,8 @@ abstract class JwtClaim implements ClaimContract
 {
     /**
      * Preset value of the claim in a blueprint.
+     *
+     * @var mixed
      */
     protected $blueprintValue;
 
@@ -19,5 +21,15 @@ abstract class JwtClaim implements ClaimContract
     public function __construct($blueprintValue = null)
     {
         $this->blueprintValue = $blueprintValue;
+    }
+
+    /**
+     * Gets the blueprint value.
+     *
+     * @return mixed
+     */
+    public function getBluepintValue()
+    {
+        return $this->blueprintValue;
     }
 }

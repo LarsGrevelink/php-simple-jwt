@@ -16,12 +16,13 @@ use Tests\Mocks\Blueprints\JwtIdBlueprintMock;
 use Tests\Mocks\Blueprints\NotBeforeBlueprintMock;
 use Tests\Mocks\Blueprints\SignatureBlueprintMock;
 use Tests\Mocks\Blueprints\SubjectBlueprintMock;
+use Tests\Mocks\Claims\SomeClaimMock;
 
 final class TokenBlueprintTest extends TestCase
 {
     public function testGetBlueprintClaims()
     {
-        $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaims');
+        $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaimValues');
 
         $this->assertSame([
             'audience' => 'Tests',
@@ -77,6 +78,8 @@ final class TokenBlueprintTest extends TestCase
             TestUtil::getStaticProperty(FullBlueprintMock::class, 'notBefore') + $time,
             $token->getNotBefore()
         );
+
+        $this->assertNull($token->getPayload('helloWorld'));
 
         // Custom claims
         $this->assertSame('claim', $token->getPayload('additional'));
@@ -212,61 +215,15 @@ final class TokenBlueprintTest extends TestCase
     public function testValidateCustomClaims()
     {
         $token = EmptyBlueprintMock::generate([
-            'some' => 'claim',
+            'some_claim' => 'some value',
         ]);
 
         $this->assertTrue(EmptyBlueprintMock::validate($token, [
-            'some' => 'claim',
+            new SomeClaimMock('some value'),
         ]));
 
         $this->assertFalse(EmptyBlueprintMock::validate($token, [
-            'some' => 'other claim',
+            new SomeClaimMock('some other value'),
         ]));
-    }
-
-    public function testGetTokenValue()
-    {
-        $token = AudienceBlueprintMock::generate();
-
-        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'audience']);
-
-        $this->assertSame('Tests', $audienceValue);
-
-        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'aud']);
-
-        $this->assertSame('Tests', $audienceValue);
-
-        $unknownValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'unknown']);
-
-        $this->assertNull($unknownValue);
-    }
-
-    public function testValidateClaim()
-    {
-        $now = time();
-
-        $expirationTimeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now + 10]);
-        $expirationTimeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now - 10]);
-
-        $this->assertTrue($expirationTimeTrue);
-        $this->assertFalse($expirationTimeFalse);
-
-        $issuedAtTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now - 10]);
-        $issuedAtFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now + 10]);
-
-        $this->assertTrue($issuedAtTrue);
-        $this->assertFalse($issuedAtFalse);
-
-        $notBeforeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now - 10]);
-        $notBeforeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now + 10]);
-
-        $this->assertTrue($notBeforeTrue);
-        $this->assertFalse($notBeforeFalse);
-
-        $othersTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', '12345']);
-        $othersFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', 12345]);
-
-        $this->assertTrue($othersTrue);
-        $this->assertFalse($othersFalse);
     }
 }
