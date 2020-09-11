@@ -90,34 +90,26 @@ abstract class TokenBlueprint
     /**
      * Generate a token and sign it based on the blueprint.
      *
-     * @param array|ClaimContract[] $claims
+     * @param array $claims
      * @param ...$signatureArguments
      *
      * @return Token
      */
     public static function generateAndSign(array $claims = [])
     {
+        if (!method_exists(static::class, 'signature')) {
+            throw new SignatureNotImplementedException(
+                sprintf('Missing signature implementation on %s', static::class)
+            );
+        }
+
         $signatureArguments = array_slice(func_get_args(), 1);
 
-        $signature = static::signature(...$signatureArguments);
+        $signature = forward_static_call_array([static::class, 'signature'], $signatureArguments);
 
         return static::generate($claims)->sign(
             $signature->signMethod(),
             $signature->signatureKey()
-        );
-    }
-
-    /**
-     * Generate a signature for a token.
-     *
-     * @throws SignatureNotImplementedException
-     *
-     * @return TokenSignature
-     */
-    public static function signature()
-    {
-        throw new SignatureNotImplementedException(
-            sprintf('Missing signature implementation on %s', static::class)
         );
     }
 
@@ -136,22 +128,31 @@ abstract class TokenBlueprint
         );
     }
 
-    // /**
-    //  * Verifies a token based on the blueprint.
-    //  *
-    //  * @param Token $token
-    //  * @param ...$signatureArguments
-    //  *
-    //  * @return bool
-    //  */
-    // public static function verify(Token $token)
-    // {
-    //     $signatureArguments = array_slice(func_get_args(), 1);
+    /**
+     * Verifies a token based on the blueprint.
+     *
+     * @param Token $token
+     * @param ...$signatureArguments
+     *
+     * @return bool
+     */
+    public static function verify(Token $token)
+    {
+        if (!method_exists(static::class, 'signature')) {
+            throw new SignatureNotImplementedException(
+                sprintf('Missing signature implementation on %s', static::class)
+            );
+        }
 
-    //     return $token->verifySignature(
-    //         forward_static_call_array([static::class, 'signature'], $signatureArguments)
-    //     );
-    // }
+        $signatureArguments = array_slice(func_get_args(), 1);
+
+        $signature = forward_static_call_array([static::class, 'signature'], $signatureArguments);
+
+        return $token->verify(
+            $signature->signMethod(),
+            $signature->signatureKey()
+        );
+    }
 
     protected static function getBlueprintClaims()
     {
