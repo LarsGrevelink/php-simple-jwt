@@ -101,7 +101,7 @@ abstract class TokenBlueprint
 
         return static::sign(
             static::generate($claims),
-            ...$signatureArguments,
+            ...$signatureArguments
         );
     }
 
