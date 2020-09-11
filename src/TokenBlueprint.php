@@ -97,6 +97,24 @@ abstract class TokenBlueprint
      */
     public static function generateAndSign(array $claims = [])
     {
+        $signatureArguments = array_slice(func_get_args(), 1);
+
+        return static::sign(
+            static::generate($claims),
+            ...$signatureArguments,
+        );
+    }
+
+    /**
+     * Generate a token and sign it based on the blueprint.
+     *
+     * @param Token $token
+     * @param ...$signatureArguments
+     *
+     * @return Token
+     */
+    public static function sign(Token $token)
+    {
         if (!method_exists(static::class, 'signature')) {
             throw new SignatureNotImplementedException(
                 sprintf('Missing signature implementation on %s', static::class)
@@ -107,7 +125,7 @@ abstract class TokenBlueprint
 
         $signature = forward_static_call_array([static::class, 'signature'], $signatureArguments);
 
-        return static::generate($claims)->sign(
+        return $token->sign(
             $signature->signMethod(),
             $signature->signatureKey()
         );
