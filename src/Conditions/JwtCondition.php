@@ -15,6 +15,6 @@ abstract class JwtCondition implements ConditionContract
             return (bool) forward_static_call([static::class, 'validate'], $value, $initialValue);
         }
 
-        return true;
+        return false;
     }
 }
