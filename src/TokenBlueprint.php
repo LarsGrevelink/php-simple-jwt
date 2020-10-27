@@ -2,6 +2,7 @@
 
 namespace LGrevelink\SimpleJWT;
 
+use LGrevelink\SimpleJWT\Claims\JwtClaim;
 use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
 
 /**
@@ -73,7 +74,7 @@ abstract class TokenBlueprint
     {
         $token = new Token($claims);
 
-        $blueprintClaims = self::getBlueprintClaims();
+        $blueprintClaims = self::getBlueprintClaimValues();
 
         foreach ($blueprintClaims as $claim => $value) {
             $methodName = self::getSetterMethod($claim);
@@ -90,7 +91,7 @@ abstract class TokenBlueprint
      * Generate a token and sign it based on the blueprint.
      *
      * @param array $claims
-     * @param array ...$signatureArguments
+     * @param ...$signatureArguments
      *
      * @return Token
      */
@@ -98,22 +99,35 @@ abstract class TokenBlueprint
     {
         $signatureArguments = array_slice(func_get_args(), 1);
 
-        return static::generate($claims)->signature(
-            forward_static_call_array([static::class, 'signature'], $signatureArguments)
+        return static::sign(
+            static::generate($claims),
+            ...$signatureArguments
         );
     }
 
     /**
-     * Generate a signature for a token.
+     * Generate a token and sign it based on the blueprint.
      *
-     * @throws SignatureNotImplementedException
+     * @param Token $token
+     * @param ...$signatureArguments
      *
-     * @return TokenSignature
+     * @return Token
      */
-    public static function signature()
+    public static function sign(Token $token)
     {
-        throw new SignatureNotImplementedException(
-            sprintf('Missing signature implementation on %s', static::class)
+        if (!method_exists(static::class, 'signature')) {
+            throw new SignatureNotImplementedException(
+                sprintf('Missing signature implementation on %s', static::class)
+            );
+        }
+
+        $signatureArguments = array_slice(func_get_args(), 1);
+
+        $signature = forward_static_call_array([static::class, 'signature'], $signatureArguments);
+
+        return $token->sign(
+            $signature->signMethod(),
+            $signature->signatureKey()
         );
     }
 
@@ -121,65 +135,54 @@ abstract class TokenBlueprint
      * Validate a token based on the blueprint.
      *
      * @param Token $token
-     * @param array $claims (optional)
+     * @param ClaimContract[] $claims (optional)
      *
      * @return bool
      */
     public static function validate(Token $token, array $claims = [])
     {
-        $claims = array_merge(self::getBlueprintClaims(), $claims);
-
-        foreach ($claims as $claim => $value) {
-            $tokenValue = self::getTokenValue($token, $claim);
-
-            if (!self::validateClaim($claim, $value, $tokenValue)) {
-                return false;
-            }
-        }
-
-        return true;
+        return $token->validate(
+            array_merge(self::getBlueprintClaims(), $claims)
+        );
     }
 
     /**
-     * Get the token value of a specific claim via a known getter or directly
-     * from the payload.
+     * Verifies a token based on the blueprint.
      *
      * @param Token $token
-     * @param string $claim
-     *
-     * @return mixed
-     */
-    protected static function getTokenValue(Token $token, string $claim)
-    {
-        $methodName = self::getGetterMethod($claim);
-
-        if (method_exists($token, $methodName)) {
-            return $token->{$methodName}();
-        }
-
-        return $token->getPayload($claim);
-    }
-
-    /**
-     * Validate a specific claim against predefined rules.
-     *
-     * @param string $claim
-     * @param mixed $expected
-     * @param mixed $actual
+     * @param ...$signatureArguments
      *
      * @return bool
      */
-    protected static function validateClaim(string $claim, $expected, $actual)
+    public static function verify(Token $token)
     {
-        if (in_array($claim, ['expirationTime'])) {
-            return time() < $actual;
+        if (!method_exists(static::class, 'signature')) {
+            throw new SignatureNotImplementedException(
+                sprintf('Missing signature implementation on %s', static::class)
+            );
         }
 
-        if (in_array($claim, ['issuedAt', 'notBefore'])) {
-            return time() >= $actual;
+        $signatureArguments = array_slice(func_get_args(), 1);
+
+        $signature = forward_static_call_array([static::class, 'signature'], $signatureArguments);
+
+        return $token->verify(
+            $signature->signMethod(),
+            $signature->signatureKey()
+        );
+    }
+
+    protected static function getBlueprintClaims()
+    {
+        $claims = self::getBlueprintClaimValues();
+
+        foreach ($claims as $name => $value) {
+            $claimClass = self::getClaimClassName($name);
+
+            $claims[$name] = new $claimClass($value);
         }
 
-        return $expected === $actual;
+        return $claims;
     }
 
     /**
@@ -187,7 +190,7 @@ abstract class TokenBlueprint
      *
      * @return array
      */
-    protected static function getBlueprintClaims()
+    protected static function getBlueprintClaimValues()
     {
         $blueprintClaims = array_keys(get_class_vars(self::class));
         $claims = [];
@@ -225,5 +228,13 @@ abstract class TokenBlueprint
     protected static function getSetterMethod(string $name)
     {
         return sprintf('set%s', ucfirst($name));
+    }
+
+    /**
+     * @param string $name
+     */
+    protected static function getClaimClassName(string $name)
+    {
+        return str_replace('\\JwtClaim', sprintf('\\%sClaim', ucfirst($name)), JwtClaim::class);
     }
 }

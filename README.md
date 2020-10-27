@@ -138,9 +138,18 @@ $token = MyToken::generate([
 $token = MyToken::generateAndSign([
     'custom-claim' => 'data'
 ], 'some-key');
+
+// or
+
+$token = MyToken::sign(
+    SignatureBlueprintMock::generate([
+        'custom-claim' => 'data'
+    ]),
+    'some-key'
+);
 ```
 
-All arguments after the custom claims passed to `TokenBlueprint::generateAndSign` will be proxied to the `TokenBlueprint::signature` method so they can be used there.
+All arguments after the first for `TokenBlueprint::generateAndSign` and `TokenBlueprint::sign` will be proxied to the `TokenBlueprint::signature` method so they can be used there. All of the methods can be used seperately or combined to fit the implementation to your needs.
 
 ## Parsing tokens
 

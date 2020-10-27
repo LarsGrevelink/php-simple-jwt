@@ -2,8 +2,16 @@
 
 namespace Tests;
 
+use LGrevelink\SimpleJWT\Claims\AudienceClaim;
+use LGrevelink\SimpleJWT\Claims\ExpirationTimeClaim;
+use LGrevelink\SimpleJWT\Claims\IssuedAtClaim;
+use LGrevelink\SimpleJWT\Claims\IssuerClaim;
+use LGrevelink\SimpleJWT\Claims\JwtIdClaim;
+use LGrevelink\SimpleJWT\Claims\NotBeforeClaim;
+use LGrevelink\SimpleJWT\Claims\SubjectClaim;
 use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
+use LGrevelink\SimpleJWT\Token;
 use LGrevelink\SimpleJWT\TokenBlueprint;
 use LGrevelink\SimpleJWT\TokenSignature;
 use Tests\Mocks\Blueprints\AudienceBlueprintMock;
@@ -16,6 +24,7 @@ use Tests\Mocks\Blueprints\JwtIdBlueprintMock;
 use Tests\Mocks\Blueprints\NotBeforeBlueprintMock;
 use Tests\Mocks\Blueprints\SignatureBlueprintMock;
 use Tests\Mocks\Blueprints\SubjectBlueprintMock;
+use Tests\Mocks\Claims\SomeClaimMock;
 
 final class TokenBlueprintTest extends TestCase
 {
@@ -23,15 +32,52 @@ final class TokenBlueprintTest extends TestCase
     {
         $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaims');
 
+        $this->assertInstanceOf(AudienceClaim::class, $claims['audience']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'audience'), $claims['audience']->getBlueprintValue());
+
+        $this->assertInstanceOf(ExpirationTimeClaim::class, $claims['expirationTime']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'expirationTime'), $claims['expirationTime']->getBlueprintValue());
+
+        $this->assertInstanceOf(IssuedAtClaim::class, $claims['issuedAt']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuedAt'), $claims['issuedAt']->getBlueprintValue());
+
+        $this->assertInstanceOf(IssuerClaim::class, $claims['issuer']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuer'), $claims['issuer']->getBlueprintValue());
+
+        $this->assertInstanceOf(JwtIdClaim::class, $claims['jwtId']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'jwtId'), $claims['jwtId']->getBlueprintValue());
+
+        $this->assertInstanceOf(NotBeforeClaim::class, $claims['notBefore']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'notBefore'), $claims['notBefore']->getBlueprintValue());
+
+        $this->assertInstanceOf(SubjectClaim::class, $claims['subject']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'subject'), $claims['subject']->getBlueprintValue());
+    }
+
+    public function testGetBlueprintClaimValues()
+    {
+        $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaimValues');
+
         $this->assertSame([
-            'audience' => 'Tests',
-            'expirationTime' => 3600,
-            'issuedAt' => 0,
-            'issuer' => 'Test suite',
-            'jwtId' => 'my-jwt-id',
-            'notBefore' => 0,
-            'subject' => 'Test validation',
+            'audience' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'audience'),
+            'expirationTime' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'expirationTime'),
+            'issuedAt' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuedAt'),
+            'issuer' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuer'),
+            'jwtId' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'jwtId'),
+            'notBefore' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'notBefore'),
+            'subject' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'subject'),
         ], $claims);
+    }
+
+    public function testGetClaimClassName()
+    {
+        $className = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getClaimClassName', ['audience']);
+
+        $this->assertSame(AudienceClaim::class, $className);
+
+        $className = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getClaimClassName', ['unknown']);
+
+        $this->assertSame('LGrevelink\\SimpleJWT\\Claims\\UnknownClaim', $className);
     }
 
     public function testGetGetterMethod()
@@ -80,6 +126,9 @@ final class TokenBlueprintTest extends TestCase
 
         // Custom claims
         $this->assertSame('claim', $token->getPayload('additional'));
+
+        // Make sure the new variables from the implementation layer do not bubble through
+        $this->assertNull($token->getPayload('helloWorld'));
     }
 
     public function testGenerateAndSign()
@@ -95,12 +144,56 @@ final class TokenBlueprintTest extends TestCase
         ], 'custom-key');
 
         $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZGRpdGlvbmFsIjoiY2xhaW0ifQ.C7bk4bT1GtU3q8ByI6dqhelAqEEzf4FqOpQjksUgsOo');
+    }
 
-        $tokenVerification = SignatureBlueprintMock::generate([
-            'additional' => 'claim',
-        ])->signature(SignatureBlueprintMock::signature('custom-key'));
+    public function testGenerateAndSignWithoutSignatureOverride()
+    {
+        $this->expectException(SignatureNotImplementedException::class);
+        $this->expectExceptionMessage(sprintf('Missing signature implementation on %s', EmptyBlueprintMock::class));
 
-        $this->assertSame($token->toString(), $tokenVerification->toString());
+        EmptyBlueprintMock::generateAndSign();
+    }
+
+    public function testSign()
+    {
+        $token = SignatureBlueprintMock::sign(
+            SignatureBlueprintMock::generate()
+        );
+
+        $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.W10.IV6Dxx5iWfV76MH4XZw8Pf3upbPnkne-9mu7wrs76dI');
+
+        $token = SignatureBlueprintMock::sign(
+            SignatureBlueprintMock::generate(),
+            'custom-key'
+        );
+
+        $this->assertSame($token->toString(), 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.W10.ANuz1Fd6j5iIbJpRckRaKmRlqGdR_Cm6yfBfueHJZck');
+    }
+
+    public function testSignWithoutSignatureOverride()
+    {
+        $this->expectException(SignatureNotImplementedException::class);
+        $this->expectExceptionMessage(sprintf('Missing signature implementation on %s', EmptyBlueprintMock::class));
+
+        EmptyBlueprintMock::sign(EmptyBlueprintMock::generate());
+    }
+
+    public function testVariousGeneratesAndSigns()
+    {
+        $customKey = 'custom-key';
+        $claims = ['my' => 'claim'];
+        $signature = SignatureBlueprintMock::signature($customKey);
+
+        $token1 = (new Token($claims))->sign(new HmacSha256, $customKey);
+        $token2 = SignatureBlueprintMock::generate($claims)->sign(new HmacSha256, $customKey);
+        $token3 = SignatureBlueprintMock::generate($claims)->sign($signature->signMethod(), $signature->signatureKey());
+        $token4 = SignatureBlueprintMock::sign(SignatureBlueprintMock::generate($claims), $customKey);
+        $token5 = SignatureBlueprintMock::generateAndSign($claims, $customKey);
+
+        $this->assertSame($token1->toString(), $token2->toString());
+        $this->assertSame($token1->toString(), $token3->toString());
+        $this->assertSame($token1->toString(), $token4->toString());
+        $this->assertSame($token1->toString(), $token5->toString());
     }
 
     public function testSignature()
@@ -116,13 +209,15 @@ final class TokenBlueprintTest extends TestCase
         $this->assertSame('custom-key', $customValueSignature->signatureKey());
     }
 
-    public function testSignatureWithoutOverride()
+    public function testVerify()
     {
-        $this->expectException(SignatureNotImplementedException::class);
-        $this->expectExceptionMessage(sprintf('Missing signature implementation on %s', EmptyBlueprintMock::class));
+        $customKey = 'custom-key';
+        $claims = ['my' => 'claim'];
 
-        EmptyBlueprintMock::signature(new TokenSignature(new HmacSha256(), 'key'));
-        EmptyBlueprintMock::generateAndSign();
+        $token = SignatureBlueprintMock::generateAndSign($claims, $customKey);
+
+        $this->assertTrue(SignatureBlueprintMock::verify($token, $customKey));
+        $this->assertFalse(SignatureBlueprintMock::verify($token, 'some-other-key'));
     }
 
     public function testValidateAudience()
@@ -205,61 +300,15 @@ final class TokenBlueprintTest extends TestCase
     public function testValidateCustomClaims()
     {
         $token = EmptyBlueprintMock::generate([
-            'some' => 'claim',
+            'some_claim' => 'some value',
         ]);
 
         $this->assertTrue(EmptyBlueprintMock::validate($token, [
-            'some' => 'claim',
+            new SomeClaimMock('some value'),
         ]));
 
         $this->assertFalse(EmptyBlueprintMock::validate($token, [
-            'some' => 'other claim',
+            new SomeClaimMock('some other value'),
         ]));
-    }
-
-    public function testGetTokenValue()
-    {
-        $token = AudienceBlueprintMock::generate();
-
-        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'audience']);
-
-        $this->assertSame('Tests', $audienceValue);
-
-        $audienceValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'aud']);
-
-        $this->assertSame('Tests', $audienceValue);
-
-        $unknownValue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getTokenValue', [$token, 'unknown']);
-
-        $this->assertNull($unknownValue);
-    }
-
-    public function testValidateClaim()
-    {
-        $now = time();
-
-        $expirationTimeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now + 10]);
-        $expirationTimeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['expirationTime', null, $now - 10]);
-
-        $this->assertTrue($expirationTimeTrue);
-        $this->assertFalse($expirationTimeFalse);
-
-        $issuedAtTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now - 10]);
-        $issuedAtFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['issuedAt', null, $now + 10]);
-
-        $this->assertTrue($issuedAtTrue);
-        $this->assertFalse($issuedAtFalse);
-
-        $notBeforeTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now - 10]);
-        $notBeforeFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['notBefore', null, $now + 10]);
-
-        $this->assertTrue($notBeforeTrue);
-        $this->assertFalse($notBeforeFalse);
-
-        $othersTrue = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', '12345']);
-        $othersFalse = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'validateClaim', ['other', '12345', 12345]);
-
-        $this->assertTrue($othersTrue);
-        $this->assertFalse($othersFalse);
     }
 }

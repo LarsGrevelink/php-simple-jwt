@@ -2,6 +2,9 @@
 
 namespace LGrevelink\SimpleJWT;
 
+use LGrevelink\SimpleJWT\Claims\ExpirationTimeClaim;
+use LGrevelink\SimpleJWT\Claims\IssuedAtClaim;
+use LGrevelink\SimpleJWT\Claims\NotBeforeClaim;
 use LGrevelink\SimpleJWT\Concerns\ComposesTokens;
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Data\DataBag;
@@ -150,6 +153,18 @@ class Token
     }
 
     /**
+     * Checks whether a claim exists on the token.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasPayload(string $name)
+    {
+        return $this->payload->has($name);
+    }
+
+    /**
      * Sets a claim on the token's payload.
      *
      * @param string $name
@@ -287,6 +302,10 @@ class Token
     /**
      * Signs the token with the given signature.
      *
+     * @todo Decide whether this small utility belongs here due to the tight integration of
+     * signatures and blueprints. Might be better to keep these functionalities in the blueprint
+     * part of the package while keeping the token fully standalone.
+     *
      * @param TokenSignature $signature
      *
      * @return $this
@@ -294,6 +313,36 @@ class Token
     public function signature(TokenSignature $signature)
     {
         return $this->sign($signature->signMethod(), $signature->signatureKey());
+    }
+
+    /**
+     * Validates the token against the default and custom conditions when given.
+     *
+     * @param ClaimContract[] $claims
+     *
+     * @return bool
+     */
+    public function validate(array $claims = [])
+    {
+        if ($this->hasPayload(ExpirationTimeClaim::JWT_CLAIM_NAME)) {
+            $claims[] = new ExpirationTimeClaim();
+        }
+
+        if ($this->hasPayload(IssuedAtClaim::JWT_CLAIM_NAME)) {
+            $claims[] = new IssuedAtClaim();
+        }
+
+        if ($this->hasPayload(NotBeforeClaim::JWT_CLAIM_NAME)) {
+            $claims[] = new NotBeforeClaim();
+        }
+
+        foreach ($claims as $claim) {
+            if (!$claim->validate($this->getPayload($claim->name()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
