@@ -2,6 +2,13 @@
 
 namespace Tests;
 
+use LGrevelink\SimpleJWT\Claims\AudienceClaim;
+use LGrevelink\SimpleJWT\Claims\ExpirationTimeClaim;
+use LGrevelink\SimpleJWT\Claims\IssuedAtClaim;
+use LGrevelink\SimpleJWT\Claims\IssuerClaim;
+use LGrevelink\SimpleJWT\Claims\JwtIdClaim;
+use LGrevelink\SimpleJWT\Claims\NotBeforeClaim;
+use LGrevelink\SimpleJWT\Claims\SubjectClaim;
 use LGrevelink\SimpleJWT\Exceptions\Blueprint\SignatureNotImplementedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
@@ -23,17 +30,54 @@ final class TokenBlueprintTest extends TestCase
 {
     public function testGetBlueprintClaims()
     {
+        $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaims');
+
+        $this->assertInstanceOf(AudienceClaim::class, $claims['audience']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'audience'), $claims['audience']->getBlueprintValue());
+
+        $this->assertInstanceOf(ExpirationTimeClaim::class, $claims['expirationTime']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'expirationTime'), $claims['expirationTime']->getBlueprintValue());
+
+        $this->assertInstanceOf(IssuedAtClaim::class, $claims['issuedAt']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuedAt'), $claims['issuedAt']->getBlueprintValue());
+
+        $this->assertInstanceOf(IssuerClaim::class, $claims['issuer']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuer'), $claims['issuer']->getBlueprintValue());
+
+        $this->assertInstanceOf(JwtIdClaim::class, $claims['jwtId']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'jwtId'), $claims['jwtId']->getBlueprintValue());
+
+        $this->assertInstanceOf(NotBeforeClaim::class, $claims['notBefore']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'notBefore'), $claims['notBefore']->getBlueprintValue());
+
+        $this->assertInstanceOf(SubjectClaim::class, $claims['subject']);
+        $this->assertSame(TestUtil::getStaticProperty(FullBlueprintMock::class, 'subject'), $claims['subject']->getBlueprintValue());
+    }
+
+    public function testGetBlueprintClaimValues()
+    {
         $claims = TestUtil::invokeStaticMethod(FullBlueprintMock::class, 'getBlueprintClaimValues');
 
         $this->assertSame([
-            'audience' => 'Tests',
-            'expirationTime' => 3600,
-            'issuedAt' => 0,
-            'issuer' => 'Test suite',
-            'jwtId' => 'my-jwt-id',
-            'notBefore' => 0,
-            'subject' => 'Test validation',
+            'audience' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'audience'),
+            'expirationTime' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'expirationTime'),
+            'issuedAt' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuedAt'),
+            'issuer' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'issuer'),
+            'jwtId' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'jwtId'),
+            'notBefore' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'notBefore'),
+            'subject' => TestUtil::getStaticProperty(FullBlueprintMock::class, 'subject'),
         ], $claims);
+    }
+
+    public function testGetClaimClassName()
+    {
+        $className = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getClaimClassName', ['audience']);
+
+        $this->assertSame(AudienceClaim::class, $className);
+
+        $className = TestUtil::invokeStaticMethod(TokenBlueprint::class, 'getClaimClassName', ['unknown']);
+
+        $this->assertSame('LGrevelink\\SimpleJWT\\Claims\\UnknownClaim', $className);
     }
 
     public function testGetGetterMethod()
@@ -163,6 +207,17 @@ final class TokenBlueprintTest extends TestCase
 
         $this->assertInstanceOf(TokenSignature::class, $customValueSignature);
         $this->assertSame('custom-key', $customValueSignature->signatureKey());
+    }
+
+    public function testVerify()
+    {
+        $customKey = 'custom-key';
+        $claims = ['my' => 'claim'];
+
+        $token = SignatureBlueprintMock::generateAndSign($claims, $customKey);
+
+        $this->assertTrue(SignatureBlueprintMock::verify($token, $customKey));
+        $this->assertFalse(SignatureBlueprintMock::verify($token, 'some-other-key'));
     }
 
     public function testValidateAudience()

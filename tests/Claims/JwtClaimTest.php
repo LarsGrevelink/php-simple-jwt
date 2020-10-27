@@ -15,6 +15,6 @@ final class JwtClaimTest extends TestCase
         $claim = $this->getMockForAbstractClass(JwtClaim::class, [$value]);
 
         $this->assertSame(TestUtil::getProperty($claim, 'blueprintValue'), $value);
-        $this->assertSame($claim->getBluepintValue(), $value);
+        $this->assertSame($claim->getBlueprintValue(), $value);
     }
 }

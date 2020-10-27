@@ -28,7 +28,7 @@ abstract class JwtClaim implements ClaimContract
      *
      * @return mixed
      */
-    public function getBluepintValue()
+    public function getBlueprintValue()
     {
         return $this->blueprintValue;
     }
