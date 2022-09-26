@@ -2,8 +2,9 @@
 
 namespace LGrevelink\SimpleJWT\Signing;
 
+use LGrevelink\SimpleJWT\Exceptions\Signing\RsaSigningException;
+use LGrevelink\SimpleJWT\Exceptions\Signing\RsaVerificationException;
 use LGrevelink\SimpleJWT\Exceptions\SigningException;
-use LGrevelink\SimpleJWT\Exceptions\VerificationException;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PrivateKey;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PublicKey;
 
@@ -71,18 +72,18 @@ abstract class Rsa extends SigningMethod
     public function sign(string $data, ?string $key = null)
     {
         if ($this->privateKey === null) {
-            throw new SigningException('A private key is needed for RSA token signing');
+            throw new RsaSigningException('A private key is needed for token signing');
         }
 
         $privateKey = openssl_pkey_get_private($this->privateKey->getKey(), $key ?? '');
         if ($privateKey === false) {
-            throw new SigningException('An error occurred while getting the RSA private key; ' . openssl_error_string());
+            throw new RsaSigningException('An error occurred while getting the private key; ' . openssl_error_string());
         }
 
         $signature = null;
 
         if (!openssl_sign($data, $signature, $privateKey, $this->getAlgorithm())) {
-            throw new SigningException('An error occurred while signing token via RSA');
+            throw new RsaSigningException('An error occurred while signing token');
         }
 
         return $signature;
@@ -96,12 +97,12 @@ abstract class Rsa extends SigningMethod
     public function verify(string $expected, string $data, ?string $key = null)
     {
         if ($this->publicKey === null) {
-            throw new VerificationException('A public key is needed for RSA token verification');
+            throw new RsaVerificationException('A public key is needed for token verification');
         }
 
         $publicKey = openssl_pkey_get_public($this->publicKey->getKey());
         if ($publicKey === false) {
-            throw new VerificationException('An error occurred while getting the RSA public key; ' . openssl_error_string());
+            throw new RsaVerificationException('An error occurred while getting the public key; ' . openssl_error_string());
         }
 
         return (bool) openssl_verify($data, $expected, $publicKey, $this->getAlgorithm());

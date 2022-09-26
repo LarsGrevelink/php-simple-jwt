@@ -2,7 +2,9 @@
 
 namespace LGrevelink\SimpleJWT\Concerns;
 
+use JsonException;
 use LGrevelink\SimpleJWT\Data\DataBag;
+use LGrevelink\SimpleJWT\Exceptions\SimpleJwtException;
 
 trait ComposesTokens
 {
@@ -27,9 +29,13 @@ trait ComposesTokens
      */
     protected function encodeDataBag(DataBag $bag)
     {
-        return self::base64UrlEncode(
-            json_encode($bag->all())
-        );
+        try {
+            return $this->base64UrlEncode(
+                json_encode($bag->all(), JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            );
+        } catch (JsonException $exception) {
+            throw new SimpleJwtException('Failed JWT composing on databag');
+        }
     }
 
     /**

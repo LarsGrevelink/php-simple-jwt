@@ -2,7 +2,8 @@
 
 namespace LGrevelink\SimpleJWT\Concerns;
 
-use LGrevelink\SimpleJWT\Exceptions\InvalidFormatException;
+use JsonException;
+use LGrevelink\SimpleJWT\Exceptions\Token\InvalidFormatException;
 use LGrevelink\SimpleJWT\Token;
 
 trait ParsesTokens
@@ -38,13 +39,11 @@ trait ParsesTokens
      */
     protected static function decodeDataBag(string $data)
     {
-        $data = json_decode(self::base64UrlDecode($data), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        try {
+            return json_decode(self::base64UrlDecode($data), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
             throw new InvalidFormatException('Failed databag parsing');
         }
-
-        return $data;
     }
 
     /**

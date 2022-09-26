@@ -2,8 +2,8 @@
 
 namespace Tests\Signing;
 
-use LGrevelink\SimpleJWT\Exceptions\SigningException;
-use LGrevelink\SimpleJWT\Exceptions\VerificationException;
+use LGrevelink\SimpleJWT\Exceptions\Signing\RsaSigningException;
+use LGrevelink\SimpleJWT\Exceptions\Signing\RsaVerificationException;
 use LGrevelink\SimpleJWT\Signing\Rsa;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PrivateKey;
 use LGrevelink\SimpleJWT\Signing\Rsa\Keys\PublicKey;
@@ -85,16 +85,16 @@ abstract class RsaTest extends TestCase
 
     public function testSignNoPrivateKeyException()
     {
-        $this->expectException(SigningException::class);
-        $this->expectExceptionMessage('A private key is needed for RSA token signing');
+        $this->expectException(RsaSigningException::class);
+        $this->expectExceptionMessage('A private key is needed for token signing');
 
         $this->rsa->sign('test suite');
     }
 
     public function testSignGetPrivateKeyException()
     {
-        $this->expectException(SigningException::class);
-        $this->expectExceptionMessageRegExp('/An error occurred while getting the RSA private key; .*/');
+        $this->expectException(RsaSigningException::class);
+        $this->expectExceptionMessageRegExp('/An error occurred while getting the private key; .*/');
 
         $this->rsa->setPrivateKey(new PrivateKeyInvalidMock('invalid/key.pem'));
 
@@ -115,16 +115,16 @@ abstract class RsaTest extends TestCase
 
     public function testVerifyNoPublicKeyException()
     {
-        $this->expectException(VerificationException::class);
-        $this->expectExceptionMessage('A public key is needed for RSA token verification');
+        $this->expectException(RsaVerificationException::class);
+        $this->expectExceptionMessage('A public key is needed for token verification');
 
         $this->rsa->verify('signature', 'test suite');
     }
 
     public function testVerifyGetPrivateKeyException()
     {
-        $this->expectException(VerificationException::class);
-        $this->expectExceptionMessageRegExp('/An error occurred while getting the RSA public key; .*/');
+        $this->expectException(RsaVerificationException::class);
+        $this->expectExceptionMessageRegExp('/An error occurred while getting the public key; .*/');
 
         $this->rsa->setPublicKey(new PublicKeyInvalidMock('invalid/key.pem'));
 

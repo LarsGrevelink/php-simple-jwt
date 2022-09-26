@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
+use LGrevelink\SimpleJWT\Exceptions\Token\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
 use Tests\Mocks\Claims\SomeClaimMock;
@@ -37,8 +37,8 @@ final class TokenTest extends TestCase
         $payload = TestUtil::getProperty($token, 'payload');
         $signature = TestUtil::getProperty($token, 'signature');
 
-        $this->assertSame(Token::JWT_HEADER_TYPE_JWT, $header->get('typ'));
-        $this->assertSame(Token::JWT_HEADER_ALGORITHM_NONE, $header->get('alg'));
+        $this->assertNull($header->get('typ'));
+        $this->assertNull($header->get('alg'));
         $this->assertSame('bag', $header->get('header'));
 
         $this->assertSame($payloadData, $payload->all());

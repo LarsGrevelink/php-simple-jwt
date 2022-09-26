@@ -8,7 +8,7 @@ use LGrevelink\SimpleJWT\Claims\NotBeforeClaim;
 use LGrevelink\SimpleJWT\Concerns\ComposesTokens;
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Data\DataBag;
-use LGrevelink\SimpleJWT\Exceptions\DataGuardedException;
+use LGrevelink\SimpleJWT\Exceptions\Token\DataGuardedException;
 use LGrevelink\SimpleJWT\Signing\SigningMethod;
 
 class Token
@@ -45,6 +45,19 @@ class Token
     protected $signature;
 
     /**
+     * Makes a new token instance.
+     *
+     * @param array $payload (optional)
+     * @param array $header (optional)
+     * @param string $signature (optional)
+     *
+     * @return Token
+     */
+    public static function make(?array $payload = null, ?array $header = null, ?string $signature = null) {
+        return new static($payload, $header, $signature);
+    }
+
+    /**
      * Constructor.
      *
      * @param array $payload (optional)
@@ -54,10 +67,10 @@ class Token
     public function __construct(?array $payload = null, ?array $header = null, ?string $signature = null)
     {
         $this->payload = new DataBag($payload ?? []);
-        $this->header = new DataBag(array_merge([
+        $this->header = new DataBag($header ?? [
             self::JWT_HEADER_TYPE => self::JWT_HEADER_TYPE_JWT,
             self::JWT_HEADER_ALGORITHM => self::JWT_HEADER_ALGORITHM_NONE,
-        ], $header ?? []));
+        ]);
         $this->signature = $signature;
     }
 
