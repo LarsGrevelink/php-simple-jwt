@@ -4,6 +4,7 @@ namespace Tests\Data;
 
 use LGrevelink\SimpleJWT\Concerns\ParsesTokens;
 use LGrevelink\SimpleJWT\Exceptions\Token\InvalidFormatException;
+use LGrevelink\SimpleJWT\Signing\Hmac\HmacSha256;
 use LGrevelink\SimpleJWT\Token;
 use Tests\TestCase;
 use Tests\TestUtil;
@@ -57,9 +58,10 @@ final class ParsesTokensTest extends TestCase
 
     public function testParse()
     {
-        $token = Token::parse('eyJoZWFkZXIiOiJiYWcifQ.eyJwYXlsb2FkIjoiYmFnIn0.zqnDp-KImi1zaWduYXR1cmU');
+        $token = Token::parse('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJKV1QgdGVzdHMiLCJpc3MiOiJMYXJyeSBDb29rIiwidXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL0xhcnNHcmV2ZWxpbmsvcGhwLXNpbXBsZS1qd3QifQ.jJoVlDemNwfvRHvjN8qv77RXzoTzA3BeV3bQkacYvYA');
 
         $this->assertTrue($token instanceof Token);
+        $this->assertTrue($token->verify(new HmacSha256(), 'your-256-bit-secret'));
     }
 
     public function testParseInvalidFormat()
