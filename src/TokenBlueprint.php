@@ -48,6 +48,13 @@ abstract class TokenBlueprint
     protected static $jwtId;
 
     /**
+     * The "kid" (Key ID) header parameter.
+     *
+     * @var mixed
+     */
+    protected static $keyId;
+
+    /**
      * The "not before" claim identifies the time before which the JWT MUST NOT be
      * accepted for processing. Relative to the current time.
      *

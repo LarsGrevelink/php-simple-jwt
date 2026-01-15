@@ -16,10 +16,19 @@ class Token
     use ParsesTokens,
         ComposesTokens;
 
+    /**
+     * No digital signature or MAC performed.
+     */
+    public const ALGORITHM_NONE = 'none';
+
+    /**
+     * JSON Web Token (JWT)
+     */
+    public const TYPE_JWT = 'JWT';
+
     public const JWT_HEADER_ALGORITHM = 'alg';
-    public const JWT_HEADER_ALGORITHM_NONE = 'none';
+    public const JWT_HEADER_KEY_ID = 'kid';
     public const JWT_HEADER_TYPE = 'typ';
-    public const JWT_HEADER_TYPE_JWT = 'JWT';
 
     public const JWT_CLAIM_AUDIENCE = 'aud';
     public const JWT_CLAIM_EXPIRATION_TIME = 'exp';
@@ -68,10 +77,23 @@ class Token
     {
         $this->payload = new DataBag($payload ?? []);
         $this->header = new DataBag($header ?? [
-            self::JWT_HEADER_TYPE => self::JWT_HEADER_TYPE_JWT,
-            self::JWT_HEADER_ALGORITHM => self::JWT_HEADER_ALGORITHM_NONE,
+            self::JWT_HEADER_TYPE => self::TYPE_JWT,
+            self::JWT_HEADER_ALGORITHM => self::ALGORITHM_NONE,
         ]);
         $this->signature = $signature;
+    }
+
+    /**
+     * Gets a header on the token's JOSE header.
+     *
+     * @param string $name
+     * @param mixed $default (optional)
+     *
+     * @return mixed
+     */
+    public function getHeader(string $name, $default = null)
+    {
+        return $this->header->get($name, $default);
     }
 
     /**
@@ -143,6 +165,16 @@ class Token
     }
 
     /**
+     * Gets the "kid" (Key ID) header parameter.
+     *
+     * @return int|null
+     */
+    public function getKeyId()
+    {
+        return $this->getHeader(self::JWT_HEADER_KEY_ID);
+    }
+
+    /**
      * Gets the "not before" claim from the token's payload. This claim identifies the time
      * before which the JWT MUST NOT be accepted for processing.
      *
@@ -166,7 +198,19 @@ class Token
     }
 
     /**
-     * Checks whether a claim exists on the token.
+     * Checks whether an attribute exists on the token's header.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasHeader(string $name)
+    {
+        return $this->header->has($name);
+    }
+
+    /**
+     * Checks whether a claim exists on the token's payload.
      *
      * @param string $name
      *
@@ -175,6 +219,27 @@ class Token
     public function hasPayload(string $name)
     {
         return $this->payload->has($name);
+    }
+
+    /**
+     * Sets a parameter on the token's header.
+     *
+     * @param string $name
+     * @param mixed $value
+     *
+     * @throws DataGuardedException
+     *
+     * @return $this
+     */
+    public function setHeader(string $name, $value)
+    {
+        if ($this->signature) {
+            throw new DataGuardedException('Token needs to be unsigned before the payload can be changed');
+        }
+
+        $this->header->set($name, $value);
+
+        return $this;
     }
 
     /**
@@ -263,6 +328,18 @@ class Token
     public function setJwtId(string $jwtId)
     {
         return $this->setPayload(self::JWT_CLAIM_JWT_ID, $jwtId);
+    }
+
+    /**
+     * Set the "kid" (Key ID) header parameter.
+     *
+     * @param string $keyId
+     *
+     * @return $this
+     */
+    public function setKeyId(string $keyId)
+    {
+        return $this->setHeader(self::JWT_HEADER_KEY_ID, $keyId);
     }
 
     /**
@@ -380,7 +457,7 @@ class Token
      */
     public function unsign()
     {
-        $this->header->set(self::JWT_HEADER_ALGORITHM, self::JWT_HEADER_ALGORITHM_NONE);
+        $this->header->set(self::JWT_HEADER_ALGORITHM, self::ALGORITHM_NONE);
         $this->signature = null;
 
         return $this;
@@ -418,4 +495,16 @@ class Token
     {
         return $relative ? time() + $seconds : $seconds;
     }
+
+    /**
+     * @deprecated
+     * @see Token::ALGORITHM_NONE
+     */
+    public const JWT_HEADER_ALGORITHM_NONE = 'none';
+
+    /**
+     * @deprecated
+     * @see Token::TYPE_JWT
+     */
+    public const JWT_HEADER_TYPE_JWT = 'JWT';
 }
